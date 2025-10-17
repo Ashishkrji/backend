@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Portfolio</title>
+
+    <!-- Bootstrap -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet">
+
+    <style>
+      body {
+        background: #f8f9fa;
+        font-family: 'Poppins', sans-serif;
+      }
+      header {
+        background: #007bff;
+        color: #fff;
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      header a {
+        color: #fff;
+        text-decoration: none;
+        font-weight: bold;
+      }
+      .portfolio-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+      }
+      .portfolio-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        overflow: hidden;
+        transition: transform 0.3s ease;
+      }
+      .portfolio-card:hover {
+        transform: translateY(-5px);
+      }
+      .portfolio-card img {
+        width: 100%;
+        height: 220px;
+        object-fit: cover;
+      }
+      .portfolio-content {
+        padding: 1rem;
+      }
+      .portfolio-content h5 {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+      .portfolio-content p {
+        color: #555;
+        font-size: 0.9rem;
+      }
+      .btn-visit {
+        display: inline-block;
+        margin-top: 0.8rem;
+        background: #007bff;
+        color: white;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        text-decoration: none;
+        transition: 0.3s;
+      }
+      .btn-visit:hover {
+        background: #0056b3;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h1>Our Portfolio</h1>
+      <a href="/">Home</a>
+    </header>
+
+    <main class="container py-4">
+      <h2 class="text-center mb-4">Featured Projects</h2>
+
+      <div class="portfolio-grid">
+        <% projects.forEach(p => { %>
+        <div class="portfolio-card">
+          <% if (p.image) { %>
+          <img src="/uploads/<%= p.image %>" alt="<%= p.title %>">
+          <% } else { %>
+          <img src="https://via.placeholder.com/400x250?text=No+Image"
+            alt="No Image">
+          <% } %>
+
+          <div class="portfolio-content">
+            <h5><%= p.title %></h5>
+
+            <%
+            const shortDesc = p.description && p.description.length > 100
+            ? p.description.substring(0, 100) + "..."
+            : p.description || "";
+            %>
+            <p><%= shortDesc %></p>
+
+            <% if (p.website) { %>
+            <a href="<%= p.website %>" target="_blank" class="btn-visit">Visit
+              Site</a>
+            <% } %>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+
+      <% if (projects.length === 0) { %>
+      <p class="text-center mt-5 text-muted">No projects added yet.</p>
+      <% } %>
+    </main>
+  </body>
+</html>

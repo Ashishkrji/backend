@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard - MaaJanki Web Tech</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <style>
+    :root {
+      --primary-color: #dc2564;
+      --text-color: #000;
+      --bg-color: #f0f2f5;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    .navbar {
+      background-color: #fff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .navbar-brand {
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+
+    .content {
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .projects-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .project-card {
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s ease;
+      width: calc(33.333% - 13.33px);
+      position: relative;
+    }
+
+    .project-card img {
+      height: 180px;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+      width: 100%;
+    }
+
+    .project-card:hover img {
+      transform: scale(1.05);
+    }
+
+    .card-title {
+      color: var(--primary-color);
+      font-weight: 600;
+      margin-bottom: 5px;
+      text-transform: capitalize;
+    }
+
+    .card-category {
+      font-size: 0.8rem;
+      color: #000;
+      margin-bottom: 5px;
+      text-transform: capitalize;
+    }
+
+    .card-text {
+      color: var(--text-color);
+      margin-bottom: 5px;
+      text-transform: capitalize;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 5px;
+    }
+
+    .sidebar {
+      background-color: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      height: calc(100vh - 70px);
+      overflow-y: auto;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .contact-item,
+    .career-item {
+      border-bottom: 1px solid #eee;
+      padding: 12px 0;
+      cursor: pointer;
+    }
+
+    .contact-item:hover,
+    .career-item:hover {
+      background-color: var(--primary-color);
+      color: #fff;
+      border-radius: 8px;
+      padding-left: 8px;
+    }
+
+    .form-control,
+    .btn-success {
+      border-radius: 8px;
+    }
+
+    .btn-success {
+      background-color: var(--primary-color);
+      border: none;
+    }
+
+    .btn-success:hover {
+      background-color: #a01b4c;
+    }
+
+    #toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1055;
+    }
+
+    @media (max-width: 992px) {
+      .project-card {
+        width: calc(50% - 10px);
+      }
+    }
+
+    @media (max-width: 576px) {
+      .project-card {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg px-4">
+    <a class="navbar-brand" href="#">Admin Dashboard</a>
+    <div class="collapse navbar-collapse justify-content-end">
+      <ul class="navbar-nav align-items-center">
+        <% if(user){ %>
+          <li class="nav-item me-3">
+            <span class="nav-link text-dark">Hello, <%= user.name %></span>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-outline-danger" href="/auth/logout">Logout</a>
+          </li>
+          <% } else { %>
+            <li class="nav-item">
+              <a class="btn btn-primary" href="/auth/login">Login</a>
+            </li>
+            <% } %>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container-fluid mt-3">
+    <!-- TABS -->
+    <ul class="nav nav-tabs" id="dashboardTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="projects-tab" data-bs-toggle="tab" data-bs-target="#projects"
+          type="button">Projects</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="contacts-tab" data-bs-toggle="tab" data-bs-target="#contacts"
+          type="button">Contacts</button>
+      </li>
+      <% if(typeof careerApps !=='undefined' ){ %>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="careers-tab" data-bs-toggle="tab" data-bs-target="#careers" type="button">Career
+            Applications</button>
+        </li>
+        <% } %>
+    </ul>
+
+    <div class="tab-content mt-3">
+      <!-- PROJECTS TAB -->
+      <div class="tab-pane fade show active" id="projects" role="tabpanel">
+        <h5>Add New Project</h5>
+        <form id="projectForm" enctype="multipart/form-data">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <input type="text" class="form-control" name="title" placeholder="Title" required />
+            </div>
+            <div class="col-md-6">
+              <input type="text" class="form-control" name="category" placeholder="Category" required />
+            </div>
+            <div class="col-md-12">
+              <textarea class="form-control" name="description" placeholder="Description" rows="2" required></textarea>
+            </div>
+            <div class="col-md-6">
+              <input type="url" class="form-control" name="websiteUrl" placeholder="Website URL" />
+            </div>
+            <div class="col-md-6">
+              <input type="file" class="form-control" name="image" accept="image/*" required />
+            </div>
+            <div class="col-12">
+              <button class="btn btn-success" type="submit">Add
+                Project</button>
+            </div>
+          </div>
+        </form>
+
+        <div class="mt-4 mb-2">
+          <strong>Filter by Category:</strong>
+          <a href="/dashboard" class="btn btn-sm btn-outline-secondary">All</a>
+          <% categories.forEach(cat=> { %>
+            <a href="/dashboard/category/<%= cat %>" class="btn btn-sm btn-outline-primary">
+              <%= cat %>
+            </a>
+            <% }) %>
+        </div>
+
+        <div class="projects-grid">
+          <% projects.forEach(project=> { %>
+            <div class="card project-card" data-id="<%= project._id %>">
+              <img src="<%= project.image ? '/uploads/'+project.image : 'https://via.placeholder.com/400x180' %>"
+                class="card-img-top" />
+              <div class="card-body">
+                <div class="card-actions">
+                  <button class="btn btn-sm btn-warning edit-btn" data-id="<%= project._id %>">Edit</button>
+                  <button class="btn btn-sm btn-danger delete-btn" data-id="<%= project._id %>">Delete</button>
+                </div>
+                <div class="card-category">
+                  <%= project.category %>
+                </div>
+                <h6 class="card-title">
+                  <%= project.title %>
+                </h6>
+                <p class="card-text">
+                  <%= project.description %>
+                </p>
+                <% if(project.websiteUrl){ %>
+                  <a href="<%= project.websiteUrl %>" target="_blank" class="btn btn-primary btn-sm">Visit</a>
+                  <% } %>
+              </div>
+            </div>
+            <% }) %>
+        </div>
+      </div>
+
+      <!-- CONTACTS TAB -->
+      <div class="tab-pane fade" id="contacts" role="tabpanel">
+        <h5>Contacts</h5>
+        <% if(contacts.length===0){ %>
+          <p>No contacts found.</p>
+          <% } else { %>
+            <% contacts.forEach(c=> { %>
+              <div class="contact-item">
+                <strong>
+                  <%= c.name %>
+                </strong> | <small>
+                  <%= c.email %>
+                </small>
+                <p>
+                  <%= c.message %>
+                </p>
+              </div>
+              <% }) %>
+                <% } %>
+      </div>
+
+      <!-- CAREER APPLICATIONS TAB -->
+      <% if(typeof careerApps !=='undefined' ){ %>
+        <div class="tab-pane fade" id="careers" role="tabpanel">
+          <h5>Career Applications</h5>
+          <% if(careerApps.length===0){ %>
+            <p>No applications found.</p>
+            <% } else { %>
+              <% careerApps.forEach(app=> { %>
+                <div class="career-item">
+                  <strong>
+                    <%= app.name %>
+                  </strong> | <small>
+                    <%= app.email %>
+                  </small>
+                  <p>Position: <%= app.position %>
+                  </p>
+                  <p>Message: <%= app.message %>
+                  </p>
+                  <p>Resume: <a href="/uploads/<%= app.cv %>" target="_blank">View</a></p>
+                  <form class="statusForm" data-id="<%= app._id %>">
+                    <select class="form-select form-select-sm" name="status">
+                      <option value="Pending" <%=app.status==='Pending' ?'selected':'' %>>Pending</option>
+                      <option value="Reviewed" <%=app.status==='Reviewed' ?'selected':'' %>>Reviewed</option>
+                      <option value="Hired" <%=app.status==='Hired' ?'selected':'' %>>Hired</option>
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-success mt-1">Update
+                      Status</button>
+                  </form>
+                </div>
+                <% }) %>
+                  <% } %>
+        </div>
+        <% } %>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const showToast = (msg, type = 'success') => {
+      const id = Date.now();
+      const container = document.getElementById("toast-container");
+      const html = `<div class="toast align-items-center text-bg-${type} border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true" id="toast-${id}">
+        <div class="d-flex">
+          <div class="toast-body">${msg}</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      </div>`;
+      container.insertAdjacentHTML("beforeend", html);
+      new bootstrap.Toast(document.getElementById(`toast-${id}`), { delay: 3000 }).show();
+    };
+
+    // Add Project
+    document.getElementById("projectForm")?.addEventListener("submit", async e => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const res = await fetch("/dashboard/projects/add", { method: 'POST', body: formData });
+      if (res.ok) location.reload();
+      else showToast("Failed to add project", "danger");
+    });
+
+    // Delete Project
+    document.querySelectorAll(".delete-btn").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        if (!confirm("Delete this project?")) return;
+        const id = btn.dataset.id;
+        const res = await fetch("/dashboard/projects/delete/" + id, { method: 'DELETE' });
+        if (res.ok) location.reload();
+        else showToast("Failed to delete project", "danger");
+      });
+    });
+
+    // Edit Project
+    document.querySelectorAll(".edit-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const id = btn.dataset.id;
+        const card = document.querySelector(`.project-card[data-id='${id}']`);
+        const title = card.querySelector(".card-title").innerText;
+        const desc = card.querySelector(".card-text").innerText;
+        const cat = card.querySelector(".card-category").innerText;
+        const website = card.querySelector("a")?.href || "";
+        const formHtml = `
+          <form id="editForm" enctype="multipart/form-data">
+            <input type="hidden" name="id" value="${id}">
+            <input class="form-control mb-1" name="title" value="${title}" required>
+            <input class="form-control mb-1" name="category" value="${cat}" required>
+            <textarea class="form-control mb-1" name="description" required>${desc}</textarea>
+            <input class="form-control mb-1" name="websiteUrl" value="${website}">
+            <input class="form-control mb-1" type="file" name="image">
+            <button class="btn btn-success btn-sm">Save</button>
+          </form>
+        `;
+        card.innerHTML = formHtml;
+        card.querySelector("form")?.addEventListener("submit", async e => {
+          e.preventDefault();
+          const data = new FormData(e.target);
+          const res = await fetch("/dashboard/projects/edit/" + id, { method: 'POST', body: data });
+          if (res.ok) location.reload();
+          else showToast("Failed to edit", "danger");
+        });
+      });
+    });
+
+    // Career status update
+    document.querySelectorAll(".statusForm").forEach(f => {
+      f.addEventListener("submit", async e => {
+        e.preventDefault();
+        const id = f.dataset.id;
+        const status = f.querySelector("select").value;
+        const res = await fetch("/dashboard/careers/update/" + id, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status })
+        });
+        if (res.ok) location.reload();
+        else showToast("Failed to update status", "danger");
+      });
+    });
+  </script>
+</body>
+
+</html>
