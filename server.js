@@ -29,7 +29,9 @@ const projectRoutes = require("./routes/projectRoutes");
 const portfolioRoutes = require("./routes/portfolioRoutes");
 
 // ---------------------- MIDDLEWARE SETUP ----------------------
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+app.use(
+  cors({ origin: "https://dashboard-myagency.vercel.app/", credentials: true })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
@@ -46,10 +48,10 @@ app.use(
 );
 
 app.get("/test", (req, res) => {
-  console.log('====================================');
+  console.log("====================================");
   res.send("Server started SuccessFull");
-  console.log('====================================');
-})
+  console.log("====================================");
+});
 
 // ---------------------- VIEW ENGINE ----------------------
 app.set("view engine", "ejs");
