@@ -45,6 +45,12 @@ app.use(
   })
 );
 
+app.get("/test", (req, res) => {
+  console.log('====================================');
+  res.send("Server started SuccessFull");
+  console.log('====================================');
+})
+
 // ---------------------- VIEW ENGINE ----------------------
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
